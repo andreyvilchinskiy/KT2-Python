@@ -41,7 +41,7 @@ def load_words_from_file() -> None:
 def select_random_word() -> None:
     global current_word, current_description
     if words_list:
-        index = random.randrange(len(words_list))
+        index = random.randint(0, len(words_list) - 1)
         current_word = words_list[index]
         current_description = descriptions_list[index]
     else:
@@ -102,11 +102,8 @@ def get_gallows_stage() -> str:
 
 
 def get_game_info() -> Dict:
-    guessed_str = (
-    ', '.join(sorted(guessed_letters)) 
-    if guessed_letters 
-    else 'пока нет'
-    )
+    guessed_str = ', '.join(sorted(guessed_letters)) if guessed_letters else 'пока нет'
+
     info = {
         'display_word': get_display_word(),
         'description': current_description,
@@ -122,16 +119,18 @@ def get_game_info() -> Dict:
 
 
 def make_move(letter: str) -> Dict:
-    global mistakes_count, status_message
-
+    global mistakes_count, status_message, guessed_letters
+    letter = letter.upper()
     is_correct, message = check_letter(letter)
     status_message = message
-
-    if is_correct is not None:  
-        if not is_correct:
-            mistakes_count += 1
-
+    
+    if is_correct or (not is_correct and message != "Ошибка: введите одну букву"):
+        if letter not in guessed_letters and letter.isalpha() and len(letter)==1:
+            guessed_letters.append(letter)
+            if not is_correct:
+                mistakes_count += 1
     return get_game_info()
+
 
 def restart_game() -> Dict:
     select_random_word()
